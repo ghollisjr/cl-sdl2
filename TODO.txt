@@ -1,0 +1,40 @@
++ Continue with SDL_video.h sections of grovel and cffi
+
+I'm traversing down the tree of headers.  So far I've made it to
+SDL_event.h -> SDL_keyboard.h -> SDL_video.h and just finished the
+SDL_pixels.h dependency.
+
++ SDL2/SDL.h
+  - main.h nothing much
+  - stdinc.h nothing much
+  - assert.h nothing much
+  + atomic.h
+  + audio.h
+  + clipboard.h
+  + cpuinfo.h
+  + endian.h
+  + error.h
+  + events.h
+  + filesystem.h
+  + gamecontroller.h
+  + haptic.h
+  + hints.h
+  + joystick.h
+  + loadso.h
+  + log.h
+  + messagebox.h
+  + metal.h
+  + mutex.h
+  + power.h
+  + render.h
+  + rwops.h
+  + sensor.h
+  + shape.h
+  + system.h
+  + thread.h
+  + timer.h
+  + version.h
+  + video.h
+  + locale.h
+  + misc.h
+  
