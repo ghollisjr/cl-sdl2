@@ -3,11 +3,11 @@ These are the basic functions and types I need for my own projects:
 constants:
 - SDL_JOYBUTTONDOWN
 - SDL_JOYBUTTONUP
-+ SDL_GL_RED_SIZE (from SDL_video.h)
-+ SDL_GL_GREEN_SIZE   ||
-+ SDL_GL_BLUE_SIZE    ||
-+ SDL_GL_DEPTH_SIZE   ||
-+ SDL_GL_DOUBLEBUFFER ||
+- SDL_GL_RED_SIZE (from SDL_video.h)
+- SDL_GL_GREEN_SIZE   ||
+- SDL_GL_BLUE_SIZE    ||
+- SDL_GL_DEPTH_SIZE   ||
+- SDL_GL_DOUBLEBUFFER ||
 
 
 These come with a bunch of keyboard constants:
@@ -19,20 +19,22 @@ types:
 
 - SDL_Joystick
 - SDL_Event (and member types)
-+ SDL_Window (SDL_video.h I think)
-+ SDL_GLContext (SDL_video.h)
+- SDL_Window (SDL_video.h I think) NOTE: Turns out this isn't needed,
+  just pointers to these objects as the structs are not exposed to user.
+- SDL_GLContext (SDL_video.h) NOTE: Turns out this is like SDL_Window,
+  an opaque handle pointer.
 
 functions:
 
 - SDL_NumJoysticks
-+ SDL_IsGameController
+- SDL_IsGameController
 - SDL_JoystickOpen
 - SDL_JoystickNumAxes
 - SDL_JoystickGetAxis
 - SDL_Init
-+ SDL_CreateWindow
-+ SDL_GL_CreateContext
-+ SDL_GL_SetAttribute
-+ SDL_GetTicks
-+ SDL_PollEvent
-+ SDL_GL_SwapWindow
+- SDL_CreateWindow
+- SDL_GL_CreateContext
+- SDL_GL_SetAttribute
+- SDL_GetTicks
+- SDL_PollEvent
+- SDL_GL_SwapWindow

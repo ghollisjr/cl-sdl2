@@ -3,6 +3,13 @@
 (defparameter +NULL+
   (cffi:null-pointer))
 
+;; utilities
+(defun join-flags (type &rest flags)
+  (apply #'logior
+         (mapcar (lambda (f)
+                   (foreign-enum-value type f))
+                 flags)))
+
 ;; SDL.h
 (defcfun "SDL_Init" :int
   (flags Uint32))
@@ -69,7 +76,7 @@
   (data :pointer)
   (len size-t))
 
-(defcfun "DL_memset" :pointer
+(defcfun "SDL_memset" :pointer
   (dst :pointer)
   (c :int)
   (len size-t))
@@ -142,13 +149,6 @@
   (gamma :float)
   (ramp :pointer))
 
-;; SDL_rect.h
-
-;; SDL_surface.h
-
-;; SDL_video.h
-
-
 ;; SDL_keyboard.h
 (defcfun "SDL_GetKeyboardFocus" :pointer)
 
@@ -184,7 +184,8 @@
 
 (defcfun "SDL_StopTextInput" :void)
 
-;; (defcfun "SDL_SetTextInputRect"
+(defcfun "SDL_SetTextInputRect" :void
+  (rect (:pointer (:struct sdl-rect))))
 
 ;; SDL_joystick.h
 (progn
@@ -561,4 +562,329 @@
   (width :int)
   (height :int))
 
+;; SDL_gamecontroller.h
+
+;; at the moment all I care about is finding one, then using joystick API
+(defcfun "SDL_IsGameController" sdl-bool
+  (joystick-index :int))
+
+;; SDL_timer.h
+(defcfun "SDL_GetTicks" Uint32)
+
+(defcfun "SDL_GetPerformanceCounter" Uint64)
+
+(defcfun "SDL_GetPerformanceFrequency" Uint64)
+
+(defcfun "SDL_Delay" :void
+  (ms Uint32))
+
+(defcfun "SDL_AddTimer" sdl-timer-id
+  (interval Uint32)
+  (callback :pointer)
+  (param :pointer))
+
+(defcfun "SDL_RemoveTimer" sdl-bool
+  (id sdl-timer-id))
+
 ;; SDL_video.h
+(defcfun "SDL_GetNumVideoDrivers" :int)
+
+(defcfun "SDL_GetVideoDriver" :string
+  (index :int))
+
+(defcfun "SDL_VideoInit" :int
+  (driver-name :string))
+
+(defcfun "SDL_VideoQuit" :void)
+
+(defcfun "SDL_GetCurrentVideoDriver" :string)
+
+(defcfun "SDL_GetNumVideoDisplays" :int)
+
+(defcfun "SDL_GetDisplayName" :string
+  (display-index :int))
+
+(defcfun "SDL_GetDisplayBounds" :int
+  (display-index :int)
+  (rect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_GetDisplayUsableBounds" :int
+  (display-index :int)
+  (rect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_GetDisplayDPI" :int
+  (display-index :int)
+  (ddpi (:pointer :float))
+  (hdpi (:pointer :float))
+  (vdpi (:pointer :float)))
+
+(defcfun "SDL_GetDisplayOrientation" sdl-display-orientation
+  (display-index :int))
+
+(defcfun "SDL_GetNumDisplayModes" :int
+  (display-index :int))
+
+(defcfun "SDL_GetDisplayMode" :int
+  (display-index :int)
+  (mode-index :int)
+  (mode (:pointer (:struct sdl-display-mode))))
+
+(defcfun "SDL_GetDesktopDisplayMOde" :int
+  (display-index :int)
+  (mode (:pointer (:struct sdl-display-mode))))
+
+(defcfun "SDL_GetCurrentDisplayMode" :int
+  (display-index :int)
+  (mode (:pointer (:struct sdl-display-mode))))
+
+(defcfun "SDL_GetClosestDisplayMode" (:pointer (:struct sdl-display-mode))
+  (display-index :int)
+  (mode (:pointer (:struct sdl-display-mode)))
+  (closest (:pointer (:struct sdl-display-mode))))
+
+(defcfun "SDL_GetWindowDisplayIndex" :int
+  (window :pointer))
+
+(defcfun "SDL_SetWindowDisplayMode" :int
+  (window :pointer)
+  (mode (:pointer (:struct sdl-display-mode))))
+
+(defcfun "SDL_GetWindowDisplayMode" :int
+  (window :pointer)
+  (mode (:pointer (:struct sdl-display-mode))))
+
+(defcfun "SDL_GetWindowPixelFormat" Uint32
+  (window :pointer))
+
+(defcfun "SDL_CreateWindow" :pointer
+  (title :string)
+  (x :int)
+  (y :int)
+  (w :int)
+  (h :int)
+  (flags Uint32))
+
+(defcfun "SDL_CreateWindowFrom" :pointer
+  (data :pointer))
+
+(defcfun "SDL_GetWindowID" Uint32
+  (window :pointer))
+
+(defcfun "SDL_GetWindowFromID" :pointer
+  (id Uint32))
+
+(defcfun "SDL_GetWindowFlags" Uint32
+  (window :pointer))
+
+(defcfun "SDL_SetWindowTitle" :void
+  (window :pointer)
+  (title :string))
+
+(defcfun "SDL_GetWindowTitle" :string
+  (window :pointer))
+
+(defcfun "SDL_SetWindowIcon" :void
+  (window :pointer)
+  (icon (:pointer (:struct sdl-surface))))
+
+(defcfun "SDL_SetWindowData" :pointer
+  (window :pointer)
+  (name :string)
+  (userdata :pointer))
+
+(defcfun "SDL_GetWindowData" :pointer
+  (window :pointer)
+  (name :string))
+
+(defcfun "SDL_SetWindowPosition" :void
+  (window :pointer)
+  (x :int)
+  (y :int))
+
+(defcfun "SDL_GetWindowPosition" :void
+  (window :pointer)
+  (x (:pointer :int))
+  (y (:pointer :int)))
+
+(defcfun "SDL_SetWindowSize" :void
+  (window :pointer)
+  (w :int)
+  (h :int))
+
+(defcfun "SDL_GetWindowSize" :void
+  (window :pointer)
+  (w (:pointer :int))
+  (h (:pointer :int)))
+
+(defcfun "SDL_GetWindowBordersSize" :int
+  (window :pointer)
+  (top (:pointer :int))
+  (left (:pointer :int))
+  (bottom (:pointer :int))
+  (right (:pointer :int)))
+
+(defcfun "SDL_SetWindowMinimumSize" :void
+  (window :pointer)
+  (min-w :int)
+  (min-h :int))
+
+(defcfun "SDL_GetWindowMinimumSize" :void
+  (window :pointer)
+  (w (:pointer :int))
+  (h (:pointer :int)))
+
+(defcfun "SDL_SetWindowMaximumSize" :void
+  (window :pointer)
+  (max-w :int)
+  (max-h :int))
+
+(defcfun "SDL_GetWindowMaximumSize" :void
+  (window :pointer)
+  (w (:pointer :int))
+  (h (:pointer :int)))
+
+(defcfun "SDL_SetWindowBordered" :void
+  (window :pointer)
+  (bordered sdl-bool))
+
+(defcfun "SDL_SetWindowResizable" :void
+  (window :pointer)
+  (resizable sdl-bool))
+
+(defcfun "SDL_ShowWindow" :void
+  (window :pointer))
+
+(defcfun "SDL_HideWindow" :void
+  (window :pointer))
+
+(defcfun "SDL_RaiseWindow" :void
+  (window :pointer))
+
+(defcfun "SDL_MaximizeWindow" :void
+    (window :pointer))
+
+(defcfun "SDL_MinimizeWindow" :void
+  (window :pointer))
+
+(defcfun "SDL_RestoreWindow" :void
+  (window :pointer))
+
+(defcfun "SDL_SetWindowFullscreen" :int
+  (window :pointer)
+  (flags Uint32))
+
+(defcfun "SDL_GetWindowSurface" (:pointer (:struct sdl-surface))
+  (window :pointer))
+
+(defcfun "SDL_UpdateWindowSurface" :int
+  (window :pointer))
+
+(defcfun "SDL_UpdateWindowSurfaceRects" :int
+  (window :pointer)
+  (rects (:pointer (:struct sdl-rect)))
+  (numrects :int))
+
+(defcfun "SDL_SetWindowGrab" :void
+  (window :pointer)
+  (grabbed sdl-bool))
+
+(defcfun "SDL_GetWindowGrab" sdl-bool
+  (window :pointer))
+
+(defcfun "SDL_GetGrabbedWindow" :pointer)
+
+(defcfun "SDL_SetWindowBrightness" :int
+  (window :pointer)
+  (brightness :float))
+
+(defcfun "SDL_GetWindowBrightness" :float
+  (window :pointer))
+
+(defcfun "SDL_SetWindowOpacity" :int
+  (window :pointer)
+  (opacity :float))
+
+(defcfun "SDL_GetWindowOpacity" :int
+  (window :pointer)
+  (out_opacity (:pointer :float)))
+
+(defcfun "SDL_SetWindowModalFor" :int
+  (modal_window :pointer)
+  (parent_window :pointer))
+
+(defcfun "SDL_SetWindowInputFocus" :int
+  (window :pointer))
+
+(defcfun "SDL_SetWindowGammaRamp" :int
+  (window :pointer)
+  (red (:pointer Uint16))
+  (green (:pointer Uint16))
+  (blue (:pointer Uint16)))
+
+(defcfun "SDL_GetWindowGammaRamp" :int
+  (window :pointer)
+  (red (:pointer Uint16))
+  (green (:pointer Uint16))
+  (blue (:pointer Uint16)))
+
+(defcfun "SDL_SetWindowHitTest" :int
+  (window :pointer)
+  (callback :pointer)
+  (callback_data :pointer))
+
+(defcfun "SDL_DestroyWindow" :void
+  (window :pointer))
+
+(defcfun "SDL_IsScreenSaverEnabled" sdl-bool)
+
+(defcfun "SDL_EnableScreenSaver" :void)
+
+(defcfun "SDL_DisableScreenSaver" :void)
+
+(defcfun "SDL_GL_LoadLibrary" :int
+  (path :string))
+
+(defcfun "SDL_GL_GetProcAddress" :pointer
+  (proc :string))
+
+(defcfun "SDL_GL_UnloadLibrary" :void)
+
+(defcfun "SDL_GL_ExtensionSupported" sdl-bool
+  (extension :string))
+
+(defcfun "SDL_GL_ResetAttributes" :void)
+
+(defcfun "SDL_GL_SetAttribute" :int
+  (attr sdl-gl-attr)
+  (value :int))
+
+(defcfun "SDL_GL_GetAttribute" :int
+  (attr sdl-gl-attr)
+  (value (:pointer :int)))
+
+(defcfun "SDL_GL_CreateContext" :pointer
+  (window :pointer))
+
+(defcfun "SDL_GL_MakeCurrent" :int
+  (window :pointer)
+  (context :pointer))
+
+(defcfun "SDL_GL_GetCurrentWindow" :pointer)
+
+(defcfun "SDL_GL_GetCurrentContext" :pointer)
+
+(defcfun "SDL_GL_GetDrawableSize" :void
+  (window :pointer)
+  (w (:pointer :int))
+  (h (:pointer :int)))
+
+(defcfun "SDL_GL_SetSwapInterval" :int
+  (interval :int))
+
+(defcfun "SDL_GL_GetSwapInterval" :int)
+
+(defcfun "SDL_GL_SwapWindow" :void
+  (window :pointer))
+
+(defcfun "SDL_GL_DeleteContext" :void
+  (context :pointer))
