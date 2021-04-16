@@ -1066,7 +1066,7 @@
          (:repeat "repeat" :type Uint8)
          (:padding2 "padding2" :type Uint8)
          (:padding3 "padding3" :type Uint8)
-         (:keysym "keysym" :type sdl-keysym))
+         (:keysym "keysym" :type (:struct sdl-keysym)))
 
 (constant (+SDL-TEXTEDITINGEVENT-TEXT-SIZE+ "SDL_TEXTEDITINGEVENT_TEXT_SIZE"))
 (constant (+SDL-TEXTINPUTEVENT-TEXT-SIZE+ "SDL_TEXTINPUTEVENT_TEXT_SIZE"))
