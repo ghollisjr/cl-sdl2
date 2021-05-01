@@ -10,4 +10,6 @@
    (:file "base-types")
    (:cffi-grovel-file "grovel")
    (:cffi-wrapper-file "wrapper")
-   (:file "sdl2-cffi")))
+   (:file "sdl2-cffi")
+   (:cffi-grovel-file "ttf-grovel")
+   (:file "ttf-cffi")))
