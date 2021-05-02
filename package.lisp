@@ -1,4 +1,4 @@
-(defpackage #:cl-sdl2-cffi
+(defpackage #:cl-sdl2
   (:use :cl :cffi)
   (:export
    ;; utilities
@@ -367,4 +367,19 @@
    :SDL-GL-SetSwapInterval
    :SDL-GL-GetSwapInterval
    :SDL-GL-SwapWindow
-   :SDL-GL-DeleteContext))
+   :SDL-GL-DeleteContext
+   ;; Controller system
+   :sdl-controller
+   :sdl-controller-names
+   :sdl-controller-aspects
+   :sdl-controller-inputs
+   :sdl-controller-handler
+   :sdl-controller-response
+   :sdl-controller-poll
+   :make-sdl-controller
+   :joystick
+   :axis
+   :button
+   :key
+   :quit
+   ))

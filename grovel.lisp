@@ -1,7 +1,7 @@
 (pkg-config-cflags "sdl2" :optional t)
 (include "SDL2/SDL.h")
 
-(in-package #:cl-sdl2-cffi)
+(in-package #:cl-sdl2)
 
 ;; Constants
 (constant (+SDL-INIT-TIMER+ "SDL_INIT_TIMER"))

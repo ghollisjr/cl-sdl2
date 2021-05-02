@@ -1,7 +1,7 @@
 (pkg-config-cflags "SDL2_ttf" :optional t)
 (include "SDL2/SDL_ttf.h")
 
-(in-package #:cl-sdl2-cffi)
+(in-package #:cl-sdl2)
 
 (CONSTANT (+SDL-TTF-MAJOR-VERSION+ "SDL_TTF_MAJOR_VERSION"))
 (CONSTANT (+SDL-TTF-MINOR-VERSION+ "SDL_TTF_MINOR_VERSION"))

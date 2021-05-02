@@ -1,4 +1,4 @@
-(in-package :cl-sdl2-cffi)
+(in-package :cl-sdl2)
 
 (defparameter +NULL+
   (cffi:null-pointer))

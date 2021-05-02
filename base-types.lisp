@@ -1,4 +1,4 @@
-(in-package :cl-sdl2-cffi)
+(in-package :cl-sdl2)
 
 (define-foreign-library cl-sdl2
   (:unix "libSDL2.so")

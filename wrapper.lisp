@@ -2,7 +2,7 @@
 ;; (flags "-I/usr/include/SDL2" "-D_REENTRANT")
 (include "SDL2/SDL.h")
 
-(in-package :cl-sdl2-cffi)
+(in-package :cl-sdl2)
 
 ;; SDL_rect.h
 
