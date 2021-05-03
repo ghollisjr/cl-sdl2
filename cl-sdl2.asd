@@ -13,4 +13,5 @@
    (:file "sdl2-cffi")
    (:cffi-grovel-file "ttf-grovel")
    (:file "ttf-cffi")
+   (:file "timer")
    (:file "controller")))

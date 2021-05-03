@@ -386,4 +386,7 @@
    :button
    :key
    :quit
+   :with-sdl-controller-aspects
+   ;; Timer system
+   :make-sdl-timer
    ))

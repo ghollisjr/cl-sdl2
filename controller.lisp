@@ -195,7 +195,7 @@ present in joysticks."
                collecting k)
             #'<))))
 
-(defmacro sdl-controller-poll (event controllers &body body)
+(defmacro sdl-controller-poll (controllers &optional event &body body)
   "Polls SDL events and hands event to each of the supplied
 controllers as well as executing body once per event after the events
 have been handled and the controller responses have been processed.
@@ -203,12 +203,11 @@ controllers is an evaluated argument.  event is a symbol used to
 designate the SDL event handle, possibly useful when supplying non-NIL
 body.
 
-Note that body is executed not once per event, but once per set of
-processed events.  This provides the ability to respond to a change in
-the control state rather than dealing with individual events, which
-are usually partial control state changes between frames."
+Note that body is executed once per event This provides the ability to
+respond to each event in ways that aren't specified by controllers."
   (let* ((cs (gensym "CONTROLLERS"))
-         (c (gensym "C")))
+         (c (gensym "C"))
+         (event (if event event (gensym "EVENT"))))
     `(with-foreign-object (,event '(:union sdl-event))
        (let* ((,cs ,controllers))
          ;; handlers
@@ -218,12 +217,12 @@ are usually partial control state changes between frames."
               (loop
                  for ,c in ,cs
                  do
-                   (funcall (sdl-controller-handler ,c) ,event)))
+                   (funcall (sdl-controller-handler ,c) ,event))
+              ,@body)
          ;; responses
          (loop
             for ,c in ,cs
-            do (funcall (sdl-controller-response ,c)))
-         ,@body))))
+            do (funcall (sdl-controller-response ,c)))))))
 
 (defun norm-axis (val min max)
   (/ (float val)
@@ -364,7 +363,10 @@ forms are:
                                    for ja in
                                      (list ,@(map 'list
                                                   (lambda (x)
-                                                    `',x)
+                                                    (list 'list
+                                                          (first x)
+                                                          `',(second x)
+                                                          (third x)))
                                                   (joystick-axes
                                                    (find-joysticks specs))))
                                    do (setf (gethash (list (first ja)
@@ -377,7 +379,10 @@ forms are:
                                       for jb in
                                         (list ,@(map 'list
                                                      (lambda (x)
-                                                       `',x)
+                                                       (list 'list
+                                                             (first x)
+                                                             `',(second x)
+                                                             (third x)))
                                                      (joystick-buttons
                                                       (find-joysticks specs))))
                                       do (setf (gethash (list (first jb)
@@ -507,3 +512,18 @@ forms are:
                      `(setf (gethash ,(first spec) ,aspects)
                             ,(second spec))))))
          ,result))))
+
+(defmacro with-sdl-controller-aspects
+    (controller (&rest aspect-bindings) &body body)
+  "Binds symbols to aspect values for given controller for body.
+
+Each aspect-binding is of the form (symbol aspect-name)."
+  (let* ((control (gensym "CONTROLLER")))
+    `(let ((,control ,controller))
+       (symbol-macrolet
+           ,(loop
+               for (symbol aspect-name) in aspect-bindings
+               collecting `(,symbol
+                            (gethash ,aspect-name
+                                     (sdl-controller-aspects ,control))))
+         ,@body))))
