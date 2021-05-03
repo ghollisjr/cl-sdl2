@@ -375,6 +375,10 @@
    :sdl-controller-inputs
    :sdl-controller-handler
    :sdl-controller-response
+   :sdl-controller-joysticks
+   :sdl-controller-joystick-handles
+   :sdl-controller-init
+   :sdl-controller-close
    :sdl-controller-poll
    :make-sdl-controller
    :joystick

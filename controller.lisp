@@ -32,7 +32,7 @@
    (inputs
     :documentation "Map from input designator to input value."
     :accessor sdl-controller-inputs
-    :initform (make-hash-table :test 'eq)
+    :initform (make-hash-table :test 'equal)
     :initarg :aspects)
    (handler
     :documentation "Event handler for SDL events.  Accepts SDL event
@@ -40,6 +40,40 @@
     :accessor sdl-controller-handler
     :initform (make-hash-table :test 'eq)
     :initarg :handler)
+   (joysticks
+    :documentation "List of joystick IDs used by this controller.
+    Useful for opening and closing SDL joysticks."
+    :accessor sdl-controller-joysticks
+    :initform NIL
+    :initarg :joysticks)
+   (joystick-handles
+    :documentation "List of SDL_Joystick pointers used by this
+    controller.  Should be managed by sdl-controller-init and
+    sdl-controller-close."
+    :accessor sdl-controller-joystick-handles
+    :initform NIL
+    :initarg :joystick-handles)
+   (axis-min
+    :documentation "Minimum value for any SDL joystick axis"
+    :accessor sdl-controller-axis-min
+    :initform -32767
+    :initarg :axis-min)
+   (axis-max
+    :documentation "Maximum value for any SDL joystick axis"
+    :accessor sdl-controller-axis-max
+    :initform 32767
+    :initarg :axis-max)
+   (initial-axis-value-map
+    :documentation "Map from (joystick-id axis) to initial value for
+    that axis (between -1 and 1 for reasonable behavior)."
+    :accessor sdl-controller-initial-axis-value-map
+    :initform (make-hash-table :test 'equal)
+    :initarg :initial-axis-value-map)
+   (deadzone-map
+    :documentation "Map from (joystick-id axis) to deadzone for that axis"
+    :accessor sdl-controller-deadzone-map
+    :initform (make-hash-table :test 'equal)
+    :initarg :deadzone-map)
    (response
     :documentation "function accepting SDL event and possibly modifying
    aspects supplied as second argument, returning T if aspects were
@@ -175,7 +209,7 @@ the control state rather than dealing with individual events, which
 are usually partial control state changes between frames."
   (let* ((cs (gensym "CONTROLLERS"))
          (c (gensym "C")))
-    `(with-foreign-object (,event 'sdl-event)
+    `(with-foreign-object (,event '(:union sdl-event))
        (let* ((,cs ,controllers))
          ;; handlers
          (loop
@@ -191,13 +225,77 @@ are usually partial control state changes between frames."
             do (funcall (sdl-controller-response ,c)))
          ,@body))))
 
+(defun norm-axis (val min max)
+  (/ (float val)
+     (max (abs min)
+          (abs max))))
+
+(defun undeadzone-axis (js-axis val deadzone-map)
+  (let* ((v (gethash js-axis deadzone-map)))
+    (if v
+        (if (> (abs val) v)
+            val
+            0)
+        val)))
+
+(defun clip-axis (x min max)
+  (max (min x max) min))
+
+(defun sdl-controller-init (controller)
+  "Initializes controller.  At the moment, opens SDL joysticks and
+sets initial axis values."
+  (let* ((njs (sdl-numjoysticks))
+         (joysticks (sdl-controller-joysticks controller))
+         (n (reduce #'max joysticks))
+         (axismin (sdl-controller-axis-min controller))
+         (axismax (sdl-controller-axis-max controller))
+         (initial-map (sdl-controller-initial-axis-value-map controller))
+         (deadzone-map (sdl-controller-deadzone-map controller)))
+    (when (>= n njs)
+      (error "Too many joysticks requested by controller"))
+    (setf (sdl-controller-joystick-handles controller)
+          (loop
+             for js in joysticks
+             collecting (sdl-joystickopen js)))
+    (loop
+       for (js axis) being the hash-keys in initial-map
+       for v being the hash-values in initial-map
+       do (setf (gethash (list 'joystick js 'axis axis)
+                         (sdl-controller-inputs controller))
+                v))))
+
+(defun sdl-controller-close (controller)
+  (let* ((joystick-handles
+          (sdl-controller-joystick-handles controller)))
+    (loop
+       for h in joystick-handles
+       when (equal (foreign-enum-value 'sdl-bool :true)
+                   (sdl-joystickgetattached h))
+       do (sdl-joystickclose h))
+    (setf (sdl-controller-joystick-handles controller) NIL)))
+
 (defmacro make-sdl-controller ((&rest specs)
                                &key
+                                 initial-axis-values
                                  deadzones
                                  (axis-min -32767) ; clipped minimum
                                  (axis-max 32767))
   "Returns a controller object which can be supplied to poll and
 controller functions to parse user input in a useful way.
+
+joysticks must be non-NIL if joysticks are used in the controller
+specifications.  If non-NIL, joysticks must be a list of SDL_Joystick
+CFFI foreign objects.  Each joystick can be referenced using (joystick
+index ...) forms in the supplied specs, where index is the index into
+the joysticks list referencing the specific joystick object being
+used.
+
+initial-axis-values can be a list of elements of the form (joystick-id
+axis value) to designate non-zero default axis values.  This is a
+workaround for SDL not being able to retrieve accurate initial axis
+readings.  There was a stackoverflow reference to this problem here:
+
+ https://stackoverflow.com/questions/63707867/with-sdl2-how-do-i-reliably-get-the-initial-positions-of-the-joystick-axes
 
 deadzones can be a list of elements of the form (joystick-id axis
 deadzone).  deadzones is an evaluated argument.
@@ -241,31 +339,82 @@ forms are:
          (axismin (gensym "AXISMIN"))
          (axismax (gensym "AXISMAX"))
          (deadzone-map (gensym "DEADZONE-MAP"))
+         (initial-map (gensym "INITIAL-MAP"))
          (undeadzone-axis (gensym "UNDEADZONE-AXIS"))
          (clipaxis (gensym "CLIPAXIS"))
-         (keys (let* ((ht (make-hash-table :test 'eq)))
-                 (loop
-                    for k in (find-keys specs)
-                    do (setf (gethash k ht) T))
-                 ht))
-         (joystick-axes (let* ((ht (make-hash-table :test 'equal)))
-                          (loop
-                             for ja in (joystick-axes specs)
-                             do (setf (gethash ja ht) T))
-                          ht))
-         (joystick-buttons (let* ((ht (make-hash-table :test 'equal)))
-                             (loop
-                                for jb in (joystick-buttons specs)
-                                do (setf (gethash jb ht) T))
-                             ht)))
+         (normaxis (gensym "NORMAXIS"))
+         (keys (gensym "KEYS"))
+         (joystick-axes (gensym "JOYSTICK-AXES"))
+         (joystick-buttons (gensym "JOYSTICK-BUTTONS")))
     `(symbol-macrolet ((,aspects (sdl-controller-aspects ,result))
                        (,inputs (sdl-controller-inputs ,result))
                        (,handler (sdl-controller-handler ,result))
                        (,response (sdl-controller-response ,result)))
-
+       ;; Set joystick-ids
        (let* ((,names (list ,@(mapcar #'first specs)))
               (,result (make-instance 'sdl-controller
-                                      :names ,names)))
+                                      :names ,names))
+              (,keys (let* ((ht (make-hash-table :test 'eq)))
+                       (loop
+                          for k in (list ,@(find-keys specs))
+                          do (setf (gethash k ht) T))
+                       ht))
+              (,joystick-axes (let* ((ht (make-hash-table :test 'equal)))
+                                (loop
+                                   for ja in
+                                     (list ,@(map 'list
+                                                  (lambda (x)
+                                                    `',x)
+                                                  (joystick-axes
+                                                   (find-joysticks specs))))
+                                   do (setf (gethash (list (first ja)
+                                                           (third ja))
+                                                     ht)
+                                            T))
+                                ht))
+              (,joystick-buttons (let* ((ht (make-hash-table :test 'equal)))
+                                   (loop
+                                      for jb in
+                                        (list ,@(map 'list
+                                                     (lambda (x)
+                                                       `',x)
+                                                     (joystick-buttons
+                                                      (find-joysticks specs))))
+                                      do (setf (gethash (list (first jb)
+                                                              (third jb))
+                                                        ht)
+                                               T))
+                                   ht))
+              (,axismax ,axis-max)
+              (,axismin ,axis-min)
+              (,initial-map (let* ((ivs ,initial-axis-values)
+                                   (ht (make-hash-table :test 'equal)))
+                              (loop
+                                 for iv in ivs
+                                 do (destructuring-bind (js axis val)
+                                        iv
+                                      (setf (gethash (list js axis) ht)
+                                            val)))
+                              ht))
+              (,deadzone-map (let* ((dzs ,deadzones)
+                                    (ht (make-hash-table :test 'equal)))
+                               (loop
+                                  for dz in dzs
+                                  do (destructuring-bind (js axis val)
+                                         dz
+                                       (setf (gethash (list js axis) ht)
+                                             val)))
+                               ht)))
+         (setf (sdl-controller-axis-min ,result)
+               ,axismin)
+         (setf (sdl-controller-axis-max ,result)
+               ,axismax)
+         (setf (sdl-controller-initial-axis-value-map ,result)
+               ,initial-map)
+         (setf (sdl-controller-deadzone-map ,result)
+               ,deadzone-map)
+         (setf (sdl-controller-joysticks ,result)
+               (list ,@(joystick-ids (find-joysticks specs))))
          (setf
           ,handler
           (lambda (,event)
@@ -273,25 +422,13 @@ forms are:
                                  'sdl-event-type
                                  (foreign-slot-value ,event '(:union sdl-event)
                                                      :type)))
-                   (,axismax ,axis-max)
-                   (,axismin ,axis-min)
-                   (,deadzone-map (let* ((dzs ,deadzones)
-                                         (ht (make-hash-table :test 'equal)))
-                                    (loop
-                                       for dz in dzs
-                                       do (destructuring-bind (js axis val)
-                                              dz
-                                            (setf (gethash (list js axis) ht)
-                                                  val)))
-                                    ht)))
-              (labels ((,undeadzone-axis (js-axis val)
-                         (let* ((v (gethash js-axis ,deadzone-map)))
-                           (if v
-                               (if (> (abs val) (third v))
-                                   val
-                                   0)
-                               val)))
-                       (,clipaxis (x) (max (min x ,axismax) ,axismin)))
+                   )
+              (labels ((,normaxis (val)
+                         (cl-sdl2::norm-axis val ,axismin ,axismax))
+                       (,undeadzone-axis (js-axis val)
+                         (cl-sdl2::undeadzone-axis js-axis val ,deadzone-map))
+                       (,clipaxis (x)
+                         (cl-sdl2::clip-axis x ,axismin ,axismax)))
                 (cond
                   ((equal ,event-type :quit)
                    (setf (gethash :quit ,inputs)
@@ -322,13 +459,19 @@ forms are:
                            (foreign-slot-value ,event
                                                '(:struct sdl-joy-axis-event)
                                                :axis)))
-                     (when (gethash (list ,js 'axis ,ja)
+                     (when (gethash (list ,js ,ja)
                                     ,joystick-axes)
                        (setf (gethash (list 'joystick ,js 'axis ,ja)
                                       ,inputs)
-                             (,undeadzone-axis
-                              (list ,js ,ja)
-                              (,clipaxis (sdl-joystickgetaxis ,js ,ja)))))))
+                             (,normaxis
+                              (,undeadzone-axis
+                               (list ,js ,ja)
+                               (,clipaxis
+                                (foreign-slot-value ,event
+                                                    '(:struct sdl-joy-axis-event)
+                                                    :value)
+                                ;; (sdl-joystickgetaxis ,js ,ja)
+                                )))))))
                   ((or (equal ,event-type :joybuttondown)
                        (equal ,event-type :joybuttonup))
                    (let* ((,js (foreign-slot-value ,event
@@ -338,7 +481,7 @@ forms are:
                            (foreign-slot-value ,event
                                                '(:struct sdl-joy-button-event)
                                                :button)))
-                     (when (gethash (list ,js 'axis ,jb)
+                     (when (gethash (list ,js ,jb)
                                     ,joystick-buttons)
                        (setf (gethash (list 'joystick ,js 'button ,jb)
                                       ,inputs)
