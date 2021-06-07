@@ -381,6 +381,7 @@
    :sdl-controller-close
    :sdl-controller-poll
    :make-sdl-controller
+   :make-sdl-controller-fn
    :joystick
    :axis
    :button

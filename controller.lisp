@@ -513,6 +513,19 @@ forms are:
                             ,(second spec))))))
          ,result))))
 
+(defun make-sdl-controller-fn (specs
+                               &key
+                                 initial-axis-values
+                                 deadzones
+                                 (axis-min -32767) ; clipped minimum
+                                 (axis-max 32767))
+  "Function version of make-sdl-controller."
+  (eval `(make-sdl-controller ,specs
+                              :initial-axis-values ,initial-axis-values
+                              :deadzones ,deadzones
+                              :axis-min ,axis-min
+                              :axis-max ,axis-max)))
+
 (defmacro with-sdl-controller-aspects
     (controller (&rest aspect-bindings) &body body)
   "Binds symbols to aspect values for given controller for body.
