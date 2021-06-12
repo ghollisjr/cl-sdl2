@@ -240,6 +240,9 @@ respond to each event in ways that aren't specified by controllers."
 (defun clip-axis (x min max)
   (max (min x max) min))
 
+(define-condition sdl-controller-njoysticks-error (error)
+  ((navailable :initarg :navailable :reader sdl-controller-njoysticks-navailable)))
+
 (defun sdl-controller-init (controller)
   "Initializes controller.  At the moment, opens SDL joysticks and
 sets initial axis values."
@@ -251,7 +254,9 @@ sets initial axis values."
          (initial-map (sdl-controller-initial-axis-value-map controller))
          (deadzone-map (sdl-controller-deadzone-map controller)))
     (when (>= n njs)
-      (error "Too many joysticks requested by controller"))
+      (error 'sdl-controller-njoysticks-error
+             :navailable njs))
+    ;; "Too many joysticks requested by controller"))
     (setf (sdl-controller-joystick-handles controller)
           (loop
              for js in joysticks

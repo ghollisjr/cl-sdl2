@@ -377,6 +377,7 @@
    :sdl-controller-response
    :sdl-controller-joysticks
    :sdl-controller-joystick-handles
+   :sdl-controller-njoysticks-error
    :sdl-controller-init
    :sdl-controller-close
    :sdl-controller-poll
