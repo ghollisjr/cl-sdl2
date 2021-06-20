@@ -888,3 +888,344 @@
 
 (defcfun "SDL_GL_DeleteContext" :void
   (context :pointer))
+
+;; SDL_render.h
+(defcfun "SDL_GetNumRenderDrivers" :int)
+
+(defcfun "SDL_GetRenderDriverInfo" :int
+  (index :int)
+  (info (:pointer (:struct sdl-renderer-info))))
+
+(defcfun "SDL_CreateWindowAndRenderer" :int
+  (width :int)
+  (height :int)
+  (window-flags Uint32)
+  (window :pointer) ; **
+  (renderer :pointer)) ; **
+
+(defcfun "SDL_CreateRenderer" :pointer
+  (window :pointer)
+  (index :int)
+  (flags Uint32))
+
+(defcfun "SDL_CreateSoftwareRenderer" :pointer
+  (surface (:pointer (:struct sdl-surface))))
+
+(defcfun "SDL_GetRenderer" :pointer
+  (window :pointer))
+
+(defcfun "SDL_GetRendererInfo" :int
+  (renderer :pointer)
+  (info (:pointer (:struct sdl-renderer-info))))
+
+(defcfun "SDL_GetRendererOutputSize" :int
+  (renderer :pointer)
+  (width (:pointer :int))
+  (height (:pointer :int)))
+
+(defcfun "SDL_CreateTexture" :pointer
+  (renderer :pointer)
+  (format Uint32)
+  (access :int)
+  (width :int)
+  (height :int))
+
+(defcfun "SDL_CreateTextureFromSurface" :pointer
+  (renderer :pointer)
+  (surface (:pointer (:struct sdl-surface))))
+
+(defcfun "SDL_QueryTexture" :int
+  (texture :pointer)
+  (format (:pointer Uint32))
+  (access (:pointer :int))
+  (width (:pointer :int))
+  (height (:pointer :int)))
+
+(defcfun "SDL_SetTextureColorMod" :int
+  (texture :pointer)
+  (red Uint8)
+  (green Uint8)
+  (blue Uint8))
+
+(defcfun "SDL_GetTextureColorMod" :int
+  (texture :pointer)
+  (red (:pointer :int))
+  (green (:pointer :int))
+  (blue (:pointer :int)))
+
+(defcfun "SDL_SetTextureAlphaMod" :int
+  (texture :pointer)
+  (alpha Uint8))
+
+(defcfun "SDL_GetTextureAlphaMod" :int
+  (texture :pointer)
+  (alpha (:pointer Uint8)))
+
+(defcfun "SDL_SetTextureBlendMode" :int
+  (texture :pointer)
+  (blendMode sdl-blend-mode))
+
+(defcfun "SDL_GetTextureBlendMode" :int
+  (texture :pointer)
+  (blendMode (:pointer sdl-blend-mode)))
+
+(defcfun "SDL_SetTextureScaleMode" :int
+  (texture :pointer)
+  (scaleMode sdl-scale-mode))
+
+(defcfun "SDL_GetTextureScaleMode" :int
+  (texture :pointer)
+  (scaleMode (:pointer sdl-scale-mode)))
+
+(defcfun "SDL_UpdateTexture" :int
+  (texture :pointer)
+  (rect (:pointer (:struct sdl-rect)))
+  (pixels :pointer)
+  (pitch :int))
+
+(defcfun "SDL_UpdateYUVTexture" :int
+  (texture :pointer)
+  (rect (:pointer (:struct sdl-rect)))
+  (Yplane (:pointer Uint8))
+  (Uplane (:pointer Uint8))
+  (Upitch :int)
+  (Vplane (:pointer Uint8))
+  (Vpitch :int))
+
+(defcfun "SDL_LockTexture" :int
+  (texture :pointer)
+  (rect (:pointer (:struct sdl-rect)))
+  (pixels (:pointer :pointer))
+  (pitch (:pointer :int)))
+
+(defcfun "SDL_LockTextureToSurface" :int
+  (texture :pointer)
+  (rect (:pointer (:struct sdl-rect)))
+  (surface (:pointer (:pointer (:struct sdl-surface)))))
+
+(defcfun "SDL_UnlockTexture" :void
+  (texture :pointer))
+
+(defcfun "SDL_RenderTargetSupported" sdl-bool
+  (renderer :pointer))
+
+(defcfun "SDL_SetRenderTarget" :int
+  (renderer :pointer)
+  (texture :pointer))
+
+(defcfun "SDL_GetRenderTarget" :pointer
+  (renderer :pointer))
+
+(defcfun "SDL_RenderSetLogicalSize" :int
+  (renderer :pointer)
+  (w :int)
+  (h :int))
+
+(defcfun "SDL_RenderGetLogicalSize" :void
+  (renderer :pointer)
+  (w (:pointer :int))
+  (h (:pointer :int)))
+
+(defcfun "SDL_RenderSetIntegerScale" :int
+  (renderer :pointer)
+  (enable sdl-bool))
+
+(defcfun "SDL_RenderGetIntegerScale" sdl-bool
+  (renderer :pointer))
+
+(defcfun "SDL_RenderSetViewport" :int
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_RenderGetViewport" :void
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_RenderSetClipRect" :int
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_RenderGetClipRect" :void
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_RenderIsClipEnabled" sdl-bool
+  (renderer :pointer))
+
+(defcfun "SDL_RenderSetScale" :int
+  (renderer :pointer)
+  (scaleX :float)
+  (scaleY :float))
+
+(defcfun "SDL_RenderGetScale" :void
+  (renderer :pointer)
+  (scaleX (:pointer :float))
+  (scaleY (:pointer :float)))
+
+(defcfun "SDL_SetRenderDrawColor" :int
+  (renderer :pointer)
+  (red Uint8)
+  (green Uint8)
+  (blue Uint8)
+  (alpha Uint8))
+
+(defcfun "SDL_GetRenderDrawColor" :int
+  (renderer :pointer)
+  (red (:pointer Uint8))
+  (green (:pointer Uint8))
+  (blue (:pointer Uint8))
+  (alpha (:pointer Uint8)))
+
+(defcfun "SDL_SetRenderDrawBlendMode" :int
+  (renderer :pointer)
+  (blendMode sdl-blend-mode))
+
+(defcfun "SDL_GetRenderDrawBlendMode" :int
+  (renderer :pointer)
+  (blendMode (:pointer sdl-blend-mode)))
+
+(defcfun "SDL_RenderClear" :int
+  (renderer :pointer))
+
+(defcfun "SDL_RenderDrawPoint" :int
+  (renderer :pointer)
+  (x :int)
+  (y :int))
+
+(defcfun "SDL_RenderDrawPoints" :int
+  (renderer :pointer)
+  (points (:pointer (:struct sdl-point)))
+  (count :int))
+
+(defcfun "SDL_RenderDrawLine" :int
+  (renderer :pointer)
+  (x1 :int)
+  (y1 :int)
+  (x2 :int)
+  (y2 :int))
+
+(defcfun "SDL_RenderDrawLines" :int
+  (renderer :pointer)
+  (points (:pointer (:struct sdl-point)))
+  (count :int))
+
+(defcfun "SDL_RenderDrawRect" :int
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_RenderDrawRects" :int
+  (renderer :pointer)
+  (rects (:pointer (:struct sdl-rect)))
+  (count :int))
+
+(defcfun "SDL_RenderFillRect" :int
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_RenderFillRects" :int
+  (renderer :pointer)
+  (rects (:pointer (:struct sdl-rect)))
+  (count :int))
+
+(defcfun "SDL_RenderCopy" :int
+  (renderer :pointer)
+  (texture :pointer)
+  (srcrect (:pointer (:struct sdl-rect)))
+  (dstrect (:pointer (:struct sdl-rect))))
+
+(defcfun "SDL_RenderCopyEx" :int
+  (renderer :pointer)
+  (texture :pointer)
+  (srcrect (:pointer (:struct sdl-rect)))
+  (dstrect (:pointer (:struct sdl-rect)))
+  (angle :double)
+  (center (:pointer (:struct sdl-point)))
+  (flip sdl-renderer-flip))
+
+(defcfun "SDL_RenderDrawPointF" :int
+  (renderer :pointer)
+  (x :float)
+  (y :float))
+
+(defcfun "SDL_RenderDrawPointsF" :int
+  (renderer :pointer)
+  (points (:pointer (:struct sdl-fpoint)))
+  (count :int))
+
+(defcfun "SDL_RenderDrawLineF" :int
+  (renderer :pointer)
+  (x1 :float)
+  (y1 :float)
+  (x2 :float)
+  (y2 :float))
+
+(defcfun "SDL_RenderDrawLinesF" :int
+  (renderer :pointer)
+  (points (:pointer (:struct sdl-fpoint)))
+  (count :int))
+
+(defcfun "SDL_RenderDrawRectF" :int
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-frect))))
+
+(defcfun "SDL_RenderDrawRectsF" :int
+  (renderer :pointer)
+  (rects (:pointer (:struct sdl-frect)))
+  (count :int))
+
+(defcfun "SDL_RenderFillRectF" :int
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-frect))))
+
+(defcfun "SDL_RenderFillRectsF" :int
+  (renderer :pointer)
+  (rects (:pointer (:struct sdl-frect)))
+  (count :int))
+
+(defcfun "SDL_RenderCopyF" :int
+  (renderer :pointer)
+  (texture :pointer)
+  (srcrect (:pointer (:struct sdl-rect)))
+  (dstrect (:pointer (:struct sdl-frect))))
+
+(defcfun "SDL_RenderCopyExF" :int
+  (renderer :pointer)
+  (texture :pointer)
+  (srcrect (:pointer (:struct sdl-rect)))
+  (dstrect (:pointer (:struct sdl-frect)))
+  (angle :double)
+  (center (:pointer (:struct sdl-fpoint)))
+  (flip sdl-renderer-flip))
+
+(defcfun "SDL_RenderReadPixels" :int
+  (renderer :pointer)
+  (rect (:pointer (:struct sdl-rect)))
+  (format Uint32)
+  (pixels :pointer)
+  (pitch :int))
+
+(defcfun "SDL_RenderPresent" :void
+  (renderer :pointer))
+
+(defcfun "SDL_DestroyTexture" :void
+  (texture :pointer))
+
+(defcfun "SDL_DestroyRenderer" :void
+  (renderer :pointer))
+
+(defcfun "SDL_RenderFlush" :int
+  (renderer :pointer))
+
+(defcfun "SDL_GL_BindTexture" :int
+  (texture :pointer)
+  (texw (:pointer :float))
+  (texh (:pointer :float)))
+
+(defcfun "SDL_GL_UnbindTexture" :int
+  (texture :pointer))
+
+(defcfun "SDL_RenderGetMetalLayer" :pointer
+  (renderer :pointer))
+
+(defcfun "SDL_RenderGetMetalCommandEncoder" :pointer
+  (renderer :pointer))

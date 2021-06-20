@@ -160,7 +160,7 @@
          (:x "x" :type :int)
          (:y "y" :type :int))
 
-(cstruct sdl-point "SDL_FPoint"
+(cstruct sdl-fpoint "SDL_FPoint"
          (:x "x" :type :float)
          (:y "y" :type :float))
 
@@ -170,7 +170,7 @@
          (:w "w" :type :int)
          (:h "h" :type :int))
 
-(cstruct sdl-rect "SDL_FRect"
+(cstruct sdl-frect "SDL_FRect"
          (:x "x" :type :float)
          (:y "y" :type :float)
          (:w "w" :type :float)
@@ -1314,10 +1314,50 @@
 
 (cenum sdl-event-action
        ((:add-event "SDL_ADDEVENT"))
-       ((:peek-event"SDL_PEEKEVENT"))
+       ((:peek-event "SDL_PEEKEVENT"))
        ((:get-event "SDL_GETEVENT")))
 
 (constant (+SDL-QUERY+ "SDL_QUERY"))
 (constant (+SDL-IGNORE+ "SDL_IGNORE"))
 (constant (+SDL-DISABLE+ "SDL_DISABLE"))
 (constant (+SDL-ENABLE+ "SDL_ENABLE"))
+
+;; SDL_render.h
+(cenum sdl-renderer-flags
+       ((:software "SDL_RENDERER_SOFTWARE"))
+       ((:accelerated "SDL_RENDERER_ACCELERATED"))
+       ((:presentvsync "SDL_RENDERER_PRESENTVSYNC"))
+       ((:targettexture "SDL_RENDERER_TARGETTEXTURE")))
+
+(cstruct sdl-renderer-info "SDL_RendererInfo"
+         (:name "name" :type :pointer)
+         (:flags "flags" :type Uint32)
+         (:num-texture-formats
+          "num_texture_formats"
+          :type Uint32
+          :count 16)
+         (:max-texture-width "max_texture_width" :type :int)
+         (:max-texture-height "max_texture_height" :type :int))
+
+(cenum sdl-scale-mode
+       ((:nearest "SDL_ScaleModeNearest"))
+       ((:linear "SDL_ScaleModeLinear"))
+       ((:best "SDL_ScaleModeBest")))
+
+(cenum sdl-texture-access
+       ((:static "SDL_TEXTUREACCESS_STATIC"))
+       ((:streaming "SDL_TEXTUREACCESS_STREAMING"))
+       ((:target "SDL_TEXTUREACCESS_TARGET")))
+
+(cenum sdl-texture-modulate
+       ((:none "SDL_TEXTUREMODULATE_NONE"))
+       ((:color "SDL_TEXTUREMODULATE_COLOR"))
+       ((:alpha "SDL_TEXTUREMODULATE_ALPHA")))
+
+(cenum sdl-renderer-flip
+       ((:none "SDL_FLIP_NONE"))
+       ((:horizontal "SDL_FLIP_HORIZONTAL"))
+       ((:vertical "SDL_FLIP_VERTICAL")))
+
+;; texture and renderer are opaque types
+

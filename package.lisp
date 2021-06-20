@@ -56,9 +56,9 @@
    :sdl-palette
    :sdl-pixelformat
    :sdl-point
-   :sdl-point
+   :sdl-fpoint
    :sdl-rect
-   :sdl-rect
+   :sdl-frect
    :sdl-surface
    :sdl-display-mode
    :sdl-keysym
@@ -368,6 +368,82 @@
    :SDL-GL-GetSwapInterval
    :SDL-GL-SwapWindow
    :SDL-GL-DeleteContext
+   ;; Renderer
+   :sdl-renderer-flags
+   :sdl-renderer-info
+   :SDL-GetNumRenderDrivers
+   :SDL-GetRenderDriverInfo
+   :SDL-CreateWindowAndRenderer
+   :SDL-CreateRenderer
+   :SDL-CreateSoftwareRenderer
+   :SDL-GetRenderer
+   :SDL-GetRendererInfo
+   :SDL-GetRendererOutputSize
+   :SDL-CreateTexture
+   :SDL-CreateTextureFromSurface
+   :SDL-QueryTexture
+   :SDL-SetTextureColorMod
+   :SDL-GetTextureColorMod
+   :SDL-SetTextureAlphaMod
+   :SDL-GetTextureAlphaMod
+   :SDL-SetTextureBlendMode
+   :SDL-GetTextureBlendMode
+   :SDL-SetTextureScaleMode
+   :SDL-GetTextureScaleMode
+   :SDL-UpdateTexture
+   :SDL-UpdateYUVTexture
+   :SDL-LockTexture
+   :SDL-LockTextureToSurface
+   :SDL-UnlockTexture
+   :SDL-RenderTargetSupported
+   :SDL-SetRenderTarget
+   :SDL-GetRenderTarget
+   :SDL-RenderSetLogicalSize
+   :SDL-RenderGetLogicalSize
+   :SDL-RenderSetIntegerScale
+   :SDL-RenderGetIntegerScale
+   :SDL-RenderSetViewport
+   :SDL-RenderGetViewport
+   :SDL-RenderSetClipRect
+   :SDL-RenderGetClipRect
+   :SDL-RenderIsClipEnabled
+   :SDL-RenderSetScale
+   :SDL-RenderGetScale
+   :SDL-SetRenderDrawColor
+   :SDL-GetRenderDrawColor
+   :SDL-SetRenderDrawBlendMode
+   :SDL-GetRenderDrawBlendMode
+   :SDL-RenderClear
+   :SDL-RenderDrawPoint
+   :SDL-RenderDrawPoints
+   :SDL-RenderDrawLine
+   :SDL-RenderDrawLines
+   :SDL-RenderDrawRect
+   :SDL-RenderDrawRects
+   :SDL-RenderFillRect
+   :SDL-RenderFillRects
+   :SDL-RenderCopy
+   :SDL-RenderCopyEx
+   :SDL-RenderDrawPointF
+   :SDL-RenderDrawPointsF
+   :SDL-RenderDrawLineF
+   :SDL-RenderDrawLinesF
+   :SDL-RenderDrawRectF
+   :SDL-RenderDrawRectsF
+   :SDL-RenderFillRectF
+   :SDL-RenderFillRectsF
+   :SDL-RenderCopyF
+   :SDL-RenderCopyExF
+   :SDL-RenderReadPixels
+   :SDL-RenderPresent
+   :SDL-DestroyTexture
+   :SDL-DestroyRenderer
+   :SDL-RenderFlush
+   :SDL-GL-BindTexture
+   :SDL-GL-UnbindTexture
+   :SDL-RenderGetMetalLayer
+   :SDL-RenderGetMetalCommandEncoder
+   
    ;; Controller system
    :sdl-controller
    :sdl-controller-names
