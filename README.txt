@@ -1,6 +1,17 @@
 cl-sdl2 is a combination of an SDL2 CFFI and a few extra systems
-defined on top of SDL2 to exploit Lisp's capabilities.  At the moment,
-these are the extra systems:
+defined on top of SDL2 to exploit Lisp's capabilities.  There is
+already a suite of SDL2 libraries available via quicklisp, but the
+design of this system is different in that it
+
+1. Exposes a more or less 1-to-1 CFFI to the SDL2 API.
+2. Builds Lispy utilities in layers on the basic CFFI.
+
+The goal of this design is to maintain direct compatibility with the
+SDL2 API so that e.g. features that aren't yet supported in a Lispy
+way can still be accessed and can be easily found by examining widely
+available SDL2 documentation.
+
+At the moment, these are the extra systems added to the CFFI:
 
 ----------------------------------------------------------------------
 sdl-controller
@@ -8,7 +19,10 @@ sdl-controller
 An sdl-controller object is best created by the make-sdl-controller
 macro.  This macro provides a simple DSL for creating abstract
 controller representations that can handle SDL events and present a
-simple interface to the programmer.
+simple interface to the programmer.  I.e. rather than directly
+handling key press and joystick events, you define an abstract
+controller that reacts to those events and presents an interface more
+suitable to the needs of your application.
 
 For example, if you imagine a simple 2-D video game where the
 character can move left, move right, and then jump, then you might
